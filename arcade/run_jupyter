@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# password: 23
+jupyter-notebook --no-browser --ip='*' --port=8899 --notebook-dir='./jup/'  \
+    --NotebookApp.password='argon2:$argon2id$v=19$m=10240,t=10,p=8$UXEKinWHjhb+FfVuj2G+mA$c032vKjbiCXQN+0WafcmTT+x+1gAFU4FbERO66ANIjo'

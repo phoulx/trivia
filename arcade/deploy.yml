@@ -1,0 +1,123 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: arcade-puj-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: arcade-puj
+  template:
+    metadata:
+      labels:
+        app: arcade-puj
+    spec:
+      containers:
+      - name: arcade
+        image: registry.baidubce.com/crowdtest-dev/arcade:latest
+        ports:
+        - containerPort: 8899
+        - containerPort: 5000
+        - containerPort: 3618
+        resources:
+          limits:
+            cpu: "16"
+            memory: 40000Mi
+            ephemeral-storage: 1000M
+          requests:
+            cpu: 100m
+            memory: 200Mi
+            ephemeral-storage: 10M
+        volumeMounts:
+        - mountPath: /home/me
+          name: my-home
+        - mountPath: /mnt/share
+          name: my-share
+      volumes:
+        - name: my-home
+          persistentVolumeClaim:
+            claimName: arcade-volume-puj
+        - name: my-share
+          persistentVolumeClaim:
+            claimName: arcade-share-puj
+      imagePullSecrets:
+      - name: baidubceregistrykey
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: arcade-volume-puj
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: common-cfs
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: arcade-share-puj
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 15Gi
+  storageClassName: common-cfs
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: arcade-service-puj
+spec:
+  ports:
+  - name: jupyter
+    port: 8877
+    targetPort: 8899
+  - name: flask
+    port: 5000
+    targetPort: 5000
+  - name: front
+    port: 3618
+    targetPort: 3618
+  selector:
+    app: arcade-puj
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: arcade-ingress-puj
+spec:
+  rules:
+  - host: puj.jupyter.baidu.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: arcade-service-puj
+            port:
+              name: jupyter
+  - host: puj.flask.baidu.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: arcade-service-puj
+            port:
+              name: flask
+  - host: puj.front.baidu.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: arcade-service-puj
+            port:
+              name: front
