@@ -1,1 +1,4 @@
 singbox/profiles.json
+env/
+__pycache__/
+tmp/
