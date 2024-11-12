@@ -31,9 +31,7 @@ def play_sound(danmu):
     try:
         with tempfile.NamedTemporaryFile(delete=True, suffix='.mp3') as fp:
             xunfei_tts = tts.TTSClient(
-                APPID=config['xunfei']['APPID'],
-                APISecret=config['xunfei']['APISecret'],
-                APIKey=config['xunfei']['APIKey'],
+                APIAuthInfo=config['xunfei'],
                 Text=text,
                 filename=fp.name
             )
@@ -41,7 +39,7 @@ def play_sound(danmu):
             sound = AudioSegment.from_mp3(fp.name)
             play(sound)
     except Exception as e:
-        logging.error(f'播放失败：{e}')
+        logging.error(f'播放失败：{e.__class__.__name__}, 信息：{e}')
 
 def process_queue(queue):
     with open('../tmp/messages.txt', 'w', buffering=1) as f:
