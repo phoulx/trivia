@@ -6,3 +6,4 @@ config.json
 cookie.txt
 app.log
 *adjusted*/
+.DS_Store
